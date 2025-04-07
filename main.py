@@ -385,24 +385,24 @@ while True:
                 sg.popup("Enrolled successfully.")
             else:
                 sg.popup_error("Enrollment failed.")
-    else:
-        sg.popup_error("No course selected.")
+        else:
+            sg.popup_error("No course selected.")
 
     # Drop course
     elif event == "Drop Course":
-    cid = values["-DROP_ID-"].strip()
-    if system.drop_course(cid):
-        sg.popup("Dropped successfully.")
-    else:
-        sg.popup_error("Drop failed.")
+        cid = values["-DROP_ID-"].strip()
+        if system.drop_course(cid):
+            sg.popup("Dropped successfully.")
+        else:
+            sg.popup_error("Drop failed.")
 
 # Handle logout
-elif event == "Logout":
-system.logout_student()
-current_user_id = None
-window.close()
-layout = login_layout()
-window = sg.Window("Login", layout)
+    elif event == "Logout":
+        system.logout_student()
+        current_user_id = None
+        window.close()
+        layout = login_layout()
+        window = sg.Window("Login", layout)
 
 # Save before exiting
 system.save_data()
