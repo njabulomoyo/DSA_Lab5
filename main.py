@@ -2,7 +2,6 @@ import csv
 import os
 from datetime import datetime
 
-
 class Student:
     def __init__(self, student_id, fullname, email, password):
         self.student_id = student_id
@@ -285,14 +284,24 @@ def register_layout():
 def dashboard_layout(student):
     return [
         [sg.Text(f"Logged in as: {student.fullname}")],
-        [sg.Button("View Available Courses")],
+        [sg.Button('Refresh Courses')],
         [sg.Listbox(values=[], key="-AVAILABLE_COURSES_LIST-", size=(50, 6))],
         [sg.Button("Enroll Selected", key="-ENROLL_SELECTED-")],
-        [sg.Button("View My Courses")],
-        [sg.Button("Enroll in Course"), sg.Input(key="-ENROLL_ID-", size=(10, 1))],
-        [sg.Button("Drop Course"), sg.Input(key="-DROP_ID-", size=(10, 1))],
+        [sg.Text("My Current courses")],
+        [sg.Listbox(values=[], key="-CURRENT_COURSES_LIST-", size=(60, 6), enable_events=False,select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED)],
+        [sg.Button("Drop Course")],
         [sg.Button("Logout")]
     ]
+def update_current_courses_list(window, system):
+    if system.current_user:
+        student = system.current_user
+        enrolled_list = []
+        for cid in student.registered_courses:
+            course = system.courses.get(cid)
+            if course:
+                enrolled_list.append(f"{course.course_id} - {course.name} | {course.days} {course.time}")
+        window["-CURRENT_COURSES_LIST-"].update(enrolled_list)
+
 
 
 # Application Loop
@@ -313,7 +322,8 @@ while True:
             current_user_id = sid
             window.close()
             layout = dashboard_layout(system.current_user)
-            window = sg.Window("Dashboard", layout)
+            window = sg.Window("Dashboard", layout, finalize=True)
+            update_current_courses_list(window, system)
         else:
             sg.popup_error("Invalid credentials.")
 
@@ -356,6 +366,18 @@ while True:
             ]
         )
 
+    elif event == "Refresh Courses":
+        system.load_data()  # Reload data from CSV
+        window["-AVAILABLE_COURSES_LIST-"].update(
+            [
+                f"{c.course_id} - {c.name} | {c.instructor} | {c.days} {c.time} | Enrolled: {len(c.enrolled_students)}/{c.max_students}"
+                for c in system.courses.values()
+            ]
+        )
+        update_current_courses_list(window, system)
+        sg.popup("Courses refreshed from file.")
+
+
 
     # View my registered courses
     elif event == "View My Courses":
@@ -373,6 +395,7 @@ while True:
         cid = values["-ENROLL_ID-"].strip()
         if system.enroll_current_user_in_course(cid):
             sg.popup("Enrolled successfully.")
+            update_current_courses_list(window, system)
         else:
             sg.popup_error("Enrollment failed.")
     elif event == "-ENROLL_SELECTED-":
@@ -388,13 +411,21 @@ while True:
         else:
             sg.popup_error("No course selected.")
 
-    # Drop course
     elif event == "Drop Course":
-        cid = values["-DROP_ID-"].strip()
-        if system.drop_course(cid):
-            sg.popup("Dropped successfully.")
+        selected = values["-CURRENT_COURSES_LIST-"]
+        if selected:
+            course_id = selected[0].split(" - ")[0]  # extract course ID from line
+            if system.drop_course(course_id):
+                sg.popup("Dropped successfully.")
+                update_current_courses_list(window, system)
+                window["-AVAILABLE_COURSES_LIST-"].update([
+                    f"{c.course_id} - {c.name} | {c.instructor} | {c.days} {c.time} | Enrolled: {len(c.enrolled_students)}/{c.max_students}"
+                    for c in system.courses.values()
+                ])
+            else:
+                sg.popup_error("Drop failed.")
         else:
-            sg.popup_error("Drop failed.")
+            sg.popup_error("No course selected.")
 
 # Handle logout
     elif event == "Logout":
