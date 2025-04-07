@@ -324,6 +324,12 @@ while True:
             layout = dashboard_layout(system.current_user)
             window = sg.Window("Dashboard", layout, finalize=True)
             update_current_courses_list(window, system)
+            available_courses = [
+                f"{c.course_id} - {c.name} | {c.instructor} | {c.days} {c.time} | Enrolled: {len(c.enrolled_students)}/{c.max_students}"
+                for c in system.courses.values()
+            ]
+            window["-AVAILABLE_COURSES_LIST-"].update(available_courses)
+
         else:
             sg.popup_error("Invalid credentials.")
 
@@ -403,13 +409,17 @@ while True:
         if selected:
             item_text = selected[0]
             course_id = item_text.split()[0]
+            update_current_courses_list(window, system)
 
             if system.enroll_current_user_in_course(course_id):
                 sg.popup("Enrolled successfully.")
+                update_current_courses_list(window, system)
             else:
                 sg.popup_error("Enrollment failed.")
+                update_current_courses_list(window, system)
         else:
             sg.popup_error("No course selected.")
+            update_current_courses_list(window, system)
 
     elif event == "Drop Course":
         selected = values["-CURRENT_COURSES_LIST-"]
