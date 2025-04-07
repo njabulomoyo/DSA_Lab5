@@ -246,6 +246,30 @@ class EnrollmentSystem:
         
 def main():
     system = EnrollmentSystem()
+    system = EnrollmentSystem()
+    if not system.courses:
+        system.add_course("BIO101", "General Biology", "Dr. Darwin", "MWF", "08:00–09:30")
+        system.add_course("CHEM101", "Intro to Chemistry", "Dr. Curie", "TR", "08:00–09:30")
+        system.add_course("MATH101", "College Algebra", "Dr. Euler", "MWF", "09:00–10:30")
+        system.add_course("PHYS101", "Physics I", "Dr. Newton", "TR", "09:00–10:30")
+        system.add_course("CS101", "Intro to Programming", "Prof. Turing", "MWF", "10:00–11:30")
+        system.add_course("PSY101", "Psychology Basics", "Dr. Freud", "TR", "10:00–11:30")
+        system.add_course("ENG101", "English Composition", "Prof. Orwell", "MWF", "11:00–12:30")
+        system.add_course("SOC101", "Intro to Sociology", "Dr. Durkheim", "TR", "11:00–12:30")
+        system.add_course("ART101", "Foundations of Art", "Prof. Picasso", "MWF", "12:00–13:30")
+        system.add_course("MUS101", "Music Theory", "Prof. Bach", "TR", "12:00–13:30")
+        system.add_course("HIST101", "World History", "Dr. Herodotus", "MWF", "13:00–14:30")
+        system.add_course("ECON101", "Microeconomics", "Dr. Smith", "TR", "13:00–14:30")
+        system.add_course("PHIL101", "Intro to Philosophy", "Dr. Kant", "MWF", "14:00–15:30")
+        system.add_course("LANG101", "Spanish I", "Prof. Cervantes", "TR", "14:00–15:30")
+        system.add_course("BUS101", "Principles of Business", "Dr. Bezos", "MWF", "08:00–09:30")
+        system.add_course("LAW101", "Intro to Law", "Prof. Ginsburg", "TR", "09:00–10:30")
+        system.add_course("ANTH101", "Cultural Anthropology", "Dr. Levi-Strauss", "MWF", "10:00–11:30")
+        system.add_course("ASTRO101", "Astronomy Basics", "Dr. Hawking", "TR", "11:00–12:30")
+        system.add_course("GEO101", "Physical Geography", "Dr. Wegener", "MWF", "12:00–13:30")
+        system.add_course("MED101", "Intro to Medicine", "Dr. House", "TR", "14:00–15:30")
+        system.save_data()
+
     system.load_data()
     
     system.register_student("S001", "Njabulo Moyo", "njabulo@uni.edu", "pass123")
