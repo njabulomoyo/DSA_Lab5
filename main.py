@@ -107,10 +107,28 @@ class EnrollmentSystem:
                         course.enrolled_students = set(row['enrolled_students'].split('|'))
 
                     self.courses[course.course_id] = course
-
+    def is_valid_password(self, password):
+            if len(password) < 8:
+                return False
+            check_letter = False
+            check_num = False
+            
+            for i in password:                
+                if i.isdigit():
+                    check_num = True
+                if i.isalpha():
+                    check_letter = True                    
+                if check_letter == True and check_num == True:
+                    return True
+            return False
+        
     def register_student(self, student_id, fullname, email, password):
         if student_id in self.students:
             print("Student ID already exists.")
+            return False
+        
+        if not self.is_valid_password(password):
+            print("Password must be at least 8 characters long and contain both letters and numbers.")
             return False
 
         student = Student(student_id, fullname, email, password)
