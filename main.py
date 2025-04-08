@@ -121,6 +121,18 @@ class EnrollmentSystem:
                 if check_letter == True and check_num == True:
                     return True
             return False
+    def fullname_check(self, name):
+        for i in name:
+            if i.isdigit():
+                print("Full name cannot contain numbers.")
+                return False
+        return True
+            
+    def email_check(self, email):
+        if "@gsumail.gram.edu" not in email:
+            print("Invalid email.")
+            return False
+        return True 
         
     def register_student(self, student_id, fullname, email, password):
         if student_id in self.students:
@@ -130,6 +142,15 @@ class EnrollmentSystem:
         if not self.is_valid_password(password):
             print("Password must be at least 8 characters long and contain both letters and numbers.")
             return False
+        
+        if not self.email_check(email):
+            print("Invalid email.")
+            return False
+        
+        if not self.fullname_check(fullname):
+            print("Name cannot contain numbers.")
+            return False
+        
 
         student = Student(student_id, fullname, email, password)
         self.students[student_id] = student
@@ -366,10 +387,22 @@ while True:
         email = values["-REG_EMAIL-"]
         pwd = values["-REG_PASS-"]
         
-        if not system.is_valid_password(pwd):
+        
+        if name == "" or sid == "" or email == "" or pwd == "":
+            sg.popup_error("Fill all the fields.")              
+        
+        elif not system.fullname_check(name):
+            sg.popup_error("Name cannot contain numbers.")
+            
+        elif not system.email_check(email):
+            sg.popup_error("Invalid email. Use school email")
+                  
+        elif not system.is_valid_password(pwd):
             sg.popup_error("Password must be at least 8 characters and include both letters and numbers.")
+        
         elif sid in system.students:
             sg.popup_error("Student ID already exists.")
+        
         
         else:
             system.register_student(sid, name, email, pwd)
