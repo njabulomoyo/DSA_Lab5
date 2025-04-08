@@ -231,7 +231,6 @@ class EnrollmentSystem:
 
 import PySimpleGUI as sg
 
-# Initialize system and load data
 system = EnrollmentSystem()
 if not system.courses:
     system.add_course("BIO101", "General Biology", "Dr. Darwin", "MWF", "08:00–09:30")
@@ -258,11 +257,9 @@ if not system.courses:
 
 system.load_data()
 
-# Track login state
 current_user_id = None
 
 
-# GUI layout functions
 def login_layout():
     return [
         [sg.Text("Student ID"), sg.Input(key="-LOGIN_ID-")],
@@ -304,7 +301,7 @@ def update_current_courses_list(window, system):
 
 
 
-# Application Loop
+
 layout = login_layout()
 window = sg.Window("Course Enrollment System", layout)
 
@@ -339,7 +336,6 @@ while True:
         layout = register_layout()
         window = sg.Window("Register New Student", layout)
 
-    # Handle registration
     elif event == "Submit Registration":
         sid = values["-REG_ID-"]
         name = values["-REG_NAME-"]
@@ -347,6 +343,7 @@ while True:
         pwd = values["-REG_PASS-"]
         if system.register_student(sid, name, email, pwd):
             sg.popup("Registration successful.")
+            system.save_data()
         else:
             sg.popup_error("Student ID already exists.")
         window.close()
@@ -358,7 +355,16 @@ while True:
         layout = login_layout()
         window = sg.Window("Login", layout)
 
-    # View available courses
+    elif event == "Refresh Courses":
+        system.load_data()
+        window["-AVAILABLE_COURSES_LIST-"].update(
+            [
+                f"{c.course_id} - {c.name} | {c.instructor} | {c.days} {c.time} | Enrolled: {len(c.enrolled_students)}/{c.max_students}"
+                for c in system.courses.values()
+            ]
+        )
+        update_current_courses_list(window, system)
+        sg.popup("Courses refreshed from file.")
     elif event == "View Available Courses":
         course_info = "\n".join([
             f"{c.course_id} - {c.name} | {c.instructor} | {c.days} {c.time} | {len(c.enrolled_students)}/{c.max_students}"
@@ -371,21 +377,23 @@ while True:
                 for c in system.courses.values()
             ]
         )
-
-    elif event == "Refresh Courses":
-        system.load_data()  # Reload data from CSV
-        window["-AVAILABLE_COURSES_LIST-"].update(
-            [
-                f"{c.course_id} - {c.name} | {c.instructor} | {c.days} {c.time} | Enrolled: {len(c.enrolled_students)}/{c.max_students}"
-                for c in system.courses.values()
-            ]
-        )
-        update_current_courses_list(window, system)
-        sg.popup("Courses refreshed from file.")
-
-
-
-    # View my registered courses
+    elif event == "-ENROLL_SELECTED-":
+        selected = values["-AVAILABLE_COURSES_LIST-"]
+        if selected:
+            item_text = selected[0]
+            course_id = item_text.split()[0]
+            update_current_courses_list(window, system)
+            system.save_data()
+            if system.enroll_current_user_in_course(course_id):
+                sg.popup("Enrolled successfully.")
+                update_current_courses_list(window, system)
+                system.save_data()
+            else:
+                sg.popup_error("Enrollment failed.")
+                update_current_courses_list(window, system)
+        else:
+            sg.popup_error("No course selected.")
+            update_current_courses_list(window, system)
     elif event == "View My Courses":
         student = system.current_user
         info = []
@@ -395,8 +403,6 @@ while True:
                 info.append(f"{course.course_id} - {course.name} | {course.days} {course.time}")
         message = "\n".join(info) if info else "No registered courses."
         sg.popup_scrolled(message, title="My Courses", size=(60, 20))
-
-    # Enroll in course
     elif event == "Enroll in Course":
         cid = values["-ENROLL_ID-"].strip()
         if system.enroll_current_user_in_course(cid):
@@ -404,27 +410,11 @@ while True:
             update_current_courses_list(window, system)
         else:
             sg.popup_error("Enrollment failed.")
-    elif event == "-ENROLL_SELECTED-":
-        selected = values["-AVAILABLE_COURSES_LIST-"]
-        if selected:
-            item_text = selected[0]
-            course_id = item_text.split()[0]
-            update_current_courses_list(window, system)
-
-            if system.enroll_current_user_in_course(course_id):
-                sg.popup("Enrolled successfully.")
-                update_current_courses_list(window, system)
-            else:
-                sg.popup_error("Enrollment failed.")
-                update_current_courses_list(window, system)
-        else:
-            sg.popup_error("No course selected.")
-            update_current_courses_list(window, system)
 
     elif event == "Drop Course":
         selected = values["-CURRENT_COURSES_LIST-"]
         if selected:
-            course_id = selected[0].split(" - ")[0]  # extract course ID from line
+            course_id = selected[0].split(" - ")[0]
             if system.drop_course(course_id):
                 sg.popup("Dropped successfully.")
                 update_current_courses_list(window, system)
@@ -432,20 +422,19 @@ while True:
                     f"{c.course_id} - {c.name} | {c.instructor} | {c.days} {c.time} | Enrolled: {len(c.enrolled_students)}/{c.max_students}"
                     for c in system.courses.values()
                 ])
+                system.save_data()
+
             else:
                 sg.popup_error("Drop failed.")
         else:
             sg.popup_error("No course selected.")
 
-# Handle logout
     elif event == "Logout":
         system.logout_student()
         current_user_id = None
         window.close()
         layout = login_layout()
         window = sg.Window("Login", layout)
-
-# Save before exiting
 system.save_data()
 window.close()
 
