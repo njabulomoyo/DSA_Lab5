@@ -1,6 +1,7 @@
 import csv
 import os
 from datetime import datetime
+import PySimpleGUI as sg
 
 class Student:
     def __init__(self, student_id, fullname, email, password):
@@ -28,9 +29,13 @@ class EnrollmentSystem:
         self.courses = {}
         self.current_user = None
 
-    def save_data(self):
-
-        with open('students.csv', 'w', newline='') as f:
+    def save_data(self):        
+        DATA_FOLDER = "data"        
+        if not os.path.exists(DATA_FOLDER):
+            os.mkdir(DATA_FOLDER)
+        student_path = os.path.join(DATA_FOLDER, 'students.csv')
+        
+        with open(student_path, 'w', newline='') as f:
             fieldnames = ['student_id', 'fullname', 'email', 'password', 'registered_courses']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
@@ -44,7 +49,8 @@ class EnrollmentSystem:
                     'registered_courses': '|'.join(student.registered_courses)
                 })
 
-        with open('courses.csv', 'w', newline='') as f:
+        course_path = os.path.join(DATA_FOLDER, 'courses.csv')
+        with open(course_path, 'w', newline='') as f:
             fieldnames = ['course_id', 'name', 'instructor', 'days', 'time', 'max_students', 'enrolled_students']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
@@ -60,32 +66,34 @@ class EnrollmentSystem:
                     'enrolled_students': '|'.join(course.enrolled_students)
                 })
 
-    def load_data(self):
-        # === Load Students ===
-        if os.path.exists('students.csv'):
+    def load_data(self):     
+
+        DATA_FOLDER = "data"        
+        if not os.path.exists(DATA_FOLDER):
+            os.mkdir(DATA_FOLDER)
+
+        student_path = os.path.join(DATA_FOLDER, 'students.csv')                
+        if os.path.exists(student_path):
             with open('students.csv', 'r') as f:
                 reader = csv.DictReader(f)
-                for row in reader:
-                    # Step 1: Create the Student object
+                for row in reader:            
                     student = Student(
                         student_id=row['student_id'],
                         fullname=row['fullname'],
                         email=row['email'],
-                        password=row['password']  # You need to update your Student class to accept this
+                        password=row['password'] 
                     )
 
-                    # Step 2: Load registered courses (if any)
+                    
                     if row['registered_courses']:
-                        student.registered_courses = set(row['registered_courses'].split('|'))
-
-                    # Step 3: Add to self.students
+                        student.registered_courses = set(row['registered_courses'].split('|'))                    
                     self.students[student.student_id] = student
-
-        if os.path.exists('courses.csv'):
+                    
+        course_path = os.path.join(DATA_FOLDER, 'courses.csv')
+        if os.path.exists(course_path):
             with open('courses.csv', 'r') as f:
                 reader = csv.DictReader(f)
-                for row in reader:
-                    # Step 1: Create the Course object
+                for row in reader:         
                     course = Course(
                         course_id=row['course_id'],
                         name=row['name'],
@@ -229,7 +237,7 @@ class EnrollmentSystem:
         return True
 
 
-import PySimpleGUI as sg
+
 
 system = EnrollmentSystem()
 if not system.courses:
