@@ -311,7 +311,6 @@ while True:
     if event == sg.WINDOW_CLOSED:
         break
 
-    # Handle login
     if event == "Login":
         sid = values["-LOGIN_ID-"]
         pwd = values["-LOGIN_PASS-"]
@@ -330,7 +329,6 @@ while True:
         else:
             sg.popup_error("Invalid credentials.")
 
-    # Switch to registration layout
     elif event == "Register":
         window.close()
         layout = register_layout()
