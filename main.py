@@ -372,7 +372,8 @@ while True:
                 for c in system.courses.values()
             ]
             window["-AVAILABLE_COURSES_LIST-"].update(available_courses)
-
+        elif sid == "" or pwd == "":
+            sg.popup_error("Fill all the fields.")
         else:
             sg.popup_error("Invalid credentials.")
 
