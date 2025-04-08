@@ -365,14 +365,20 @@ while True:
         name = values["-REG_NAME-"]
         email = values["-REG_EMAIL-"]
         pwd = values["-REG_PASS-"]
-        if system.register_student(sid, name, email, pwd):
+        
+        if not system.is_valid_password(pwd):
+            sg.popup_error("Password must be at least 8 characters and include both letters and numbers.")
+        elif sid in system.students:
+            sg.popup_error("Student ID already exists.")
+        
+        else:
+            system.register_student(sid, name, email, pwd)
             sg.popup("Registration successful.")
             system.save_data()
-        else:
-            sg.popup_error("Student ID already exists.")
-        window.close()
-        layout = login_layout()
-        window = sg.Window("Login", layout)
+                    
+            window.close()
+            layout = login_layout()
+            window = sg.Window("Login", layout)
 
     elif event == "Back":
         window.close()
