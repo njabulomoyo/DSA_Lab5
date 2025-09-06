@@ -107,6 +107,7 @@ class EnrollmentSystem:
                         course.enrolled_students = set(row['enrolled_students'].split('|'))
 
                     self.courses[course.course_id] = course
+    
     def is_valid_password(self, password):
             if len(password) < 8:
                 return False
@@ -500,5 +501,7 @@ while True:
         layout = login_layout()
         window = sg.Window("Login", layout)
 system.save_data()
+print("Data saved. Exiting...")
 window.close()
+
 
